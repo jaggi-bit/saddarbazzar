@@ -1,0 +1,81 @@
+# Product Requirements Document (PRD): Localized High-Performance E-Commerce Platform
+
+## 1. Problem Statement
+Current localized e-commerce experiences often suffer from poor front-end performance, inconsistent session management, and a fragmented checkout process. Pakistani consumers face friction with limited payment options and unreliable cart persistence, while merchants struggle with manual logistics (AWB generation) and inventory synchronization. There is a need for a robust, blazing-fast e-commerce solution that seamlessly integrates with local logistics (Trax/Leopards) and payment gateways (Easypaisa/JazzCash/Cards) while prioritizing a seamless user experience across all devices.
+
+## 2. Target User
+**Primary User (The Shopper):**
+* Mobile-first consumer facing varying internet speeds.
+* Values quick page loads, visual clarity, and frictionless checkout.
+* Prefers a mix of localized digital payments and Cash on Delivery (COD).
+
+**Secondary User (The Merchant/Admin):**
+* Needs a centralized dashboard to track inventory, process orders, and manage dynamic landing page campaigns without touching code.
+* Requires automated shipping integrations to reduce manual data entry.
+
+## 3. Core User Flows
+**Flow A: The Frictionless Purchase (Shopper)**
+1. Lands on homepage (cached, loads in < 2 seconds).
+2. Filters products by category/price.
+3. Adds item to cart (**Saved to database for 7-day persistence, NO inventory locked yet**).
+4. Proceeds to checkout (Selects Guest Checkout or Logs in).
+5. **Enters shipping details -> Inventory is temporarily locked in the background for 15 minutes.**
+6. Applies promo code (if applicable).
+7. Selects Shipping (auto-calculated) and Payment Method (Gateway or COD).
+8. Completes order -> Receives automated email confirmation.
+
+**Flow B: Order Fulfillment (Admin)**
+1. Logs into Admin Portal securely.
+2. Views new orders on the dashboard analytics.
+3. Selects "Just Got Order" -> reviews details.
+4. Triggers "Generate AWB" via Logistics API (Trax/Leopards).
+5. Updates status to "Shipped" -> System emails customer tracking info.
+
+## 4. Feature List
+### MVP (Minimum Viable Product - V1)
+...
+**Shopping & Checkout:**
+* Product catalog with basic search and filtering (price, category).
+* Cart management with **persistent 7-day database storage**.
+* **15-minute temporary inventory locking triggered ONLY when the user initiates the checkout process.**
+* Guest checkout flow and user account creation.
+* Promo code engine (fixed amount or percentage discount).
+* Checkout integration with a local payment aggregator (e.g., Safepay/PayFast) supporting Easypaisa, JazzCash, and Cards.
+
+**Shopping & Checkout:**
+* Product catalog with basic search and filtering (price, category).
+* Cart management with 15-minute temporary inventory locking.
+* Guest checkout flow and user account creation.
+* Promo code engine (fixed amount or percentage discount).
+* Checkout integration with a local payment aggregator (e.g., Safepay/PayFast) supporting Easypaisa, JazzCash, and Cards.
+
+**Admin & Backend:**
+* CMS for dynamic landing page layout (updating banners, featured products).
+* Secure Admin Panel with CRUD operations for Products, Categories, and Promo Codes.
+* Order management system with standard statuses: Pending, Processing, Shipped, Delivered, Canceled.
+* API integration for automated Airway Bill (AWB) generation with one local courier (Trax or Leopards).
+* Automated transactional emails (Order placed, Order shipped).
+
+### Future (V2 & Beyond)
+* Advanced Product Recommendations (AI-driven "Frequently bought together").
+* Integrating Calling agent in Urdu language .
+* Advanced Returns & Refunds workflow management.
+* Comprehensive analytics dashboard (Heatmaps, LTV, CAC).
+
+## 5. Edge Cases
+* **Concurrent Checkout:** Two users attempt to buy the last available unit at the exact same millisecond (handled via strict database transaction isolation and Redis locking).
+* **Payment Gateway Timeout:** User's account is debited, but the gateway fails to ping the backend webhook (requires a background reconciliation job to verify pending payments).
+* **Cart Abandonment Post-Lock:** User locks inventory but closes the tab. The system must release the lock exactly after the TTL (Time-To-Live) expires so the item is sellable again.
+* **Invalid Delivery Pin Codes:** User enters a rural zip code not supported by the integrated courier (system must fallback to custom shipping quotes or block checkout).
+
+## 6. Non-Goals (For V1)
+* Building a multi-vendor marketplace (like Daraz); this is strictly a single-tenant store.
+* Developing native iOS/Android applications (focus entirely on a robust web app/PWA first).
+* Building a custom internal payment gateway (strictly use third-party aggregators).
+* Complex loyalty point and reward systems.
+
+## 7. Success Metrics
+* **Performance:** Largest Contentful Paint (LCP) under 2.5 seconds on mobile 3G.
+* **Reliability:** 99.9% uptime for core checkout flows; zero dropped database transactions during inventory locking.
+* **Conversion:** Cart-to-Checkout completion rate > 30%.
+* **Retention:** Session persistence success rate of 100% across browser re-opens within a 7-day window.

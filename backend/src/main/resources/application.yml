@@ -1,0 +1,23 @@
+spring:
+  application:
+    name: sadar-bazar-api
+
+  profiles:
+    active: dev
+
+server:
+  port: 8080
+  servlet:
+    context-path: /api/v1
+
+# Common settings
+app:
+  jwt:
+    secret: ${JWT_SECRET:my-super-secret-dev-key-that-is-at-least-256-bits-long-for-hs256}
+    expiration-ms: 86400000  # 24 hours
+  cors:
+    allowed-origins: ${CORS_ORIGINS:http://localhost:3000}
+  cart:
+    expiry-days: 7
+  inventory-lock:
+    ttl-minutes: 15

@@ -1,0 +1,93 @@
+# Technical Requirements Document (TRD): Localized E-Commerce Platform V1
+
+## 1. System Architecture Overview
+The system follows a decoupled Client-Server architecture, containerized for reliable deployment.
+* **Frontend:** Next.js (React) for server-side rendering (SSR), aggressive caching, and fast First Contentful Paint (FCP).
+* **Backend:** Java with Spring Boot, serving as a stateless RESTful API. This provides robust multi-threading and transactional integrity for the checkout process.
+* **Database:** PostgreSQL for persistent, relational data (ACID compliance is mandatory for orders/inventory).
+* **Cache & Message Broker:** Redis for distributed session management, temporary cart storage, and 15-minute distributed inventory locks.
+
+## 2. Deployment & Infrastructure Strategy
+To ensure a robust, scalable, and economically viable production environment, the entire stack will be hosted on a Virtual Private Server (VPS) using containerization.
+
+* **Primary Host:** **Hostinger VPS** (Recommended: KVM 2 or KVM 4 plan). These plans provide dedicated NVMe storage, AMD EPYC processors, and full root access at a highly cost-effective monthly rate.
+* **Containerization:** **Docker & Docker Compose**. The frontend, backend, PostgreSQL database, and Redis cache will all run as isolated containers on the Hostinger VPS. This guarantees parity between local development and production while making server migrations painless.
+* **Web Server & Reverse Proxy:** **Nginx** running on the VPS to handle incoming HTTP/HTTPS requests, serving as a reverse proxy to route traffic to the Next.js container (e.g., port 3000) and the Spring Boot API container (e.g., port 8080).
+* **SSL/TLS Certificate:** **Let's Encrypt** (Certbot) automated via Nginx to provide free, auto-renewing HTTPS encryption.
+* **CI/CD Pipeline:** **GitHub Actions**. Code pushed to the `main` branch will trigger an automated workflow to build the Docker images, push them to a container registry (or securely transfer them), and restart the services on the VPS via SSH.
+
+## 3. Frontend Responsibilities (Next.js / React)
+* **State Management:** Zustand or Redux Toolkit for managing the active shopping cart and user session state.
+* **Data Fetching & Caching:** React Query for caching server state (product catalogs) locally, minimizing redundant API calls, and providing instant UI updates.
+* **Dynamic UI Rendering:** Consume a JSON payload from the backend to dynamically render the homepage landing components based on admin configurations.
+* **Security:** Ensure HTTP-only cookies are used for storing session tokens to prevent XSS (Cross-Site Scripting) attacks.
+
+## 4. Backend Responsibilities (Java / Spring Boot)
+* **Core Business Logic:** Handle price calculations, discount application, and inventory validation.
+* **Design Patterns:** * Use a **Facade pattern** for the logistics integrations. This abstracts the complexity of Trax/Leopards APIs, allowing you to swap couriers later without touching the core order service.
+    * Use a **Factory pattern** to instantiate different payment processing strategies dynamically.
+* **Concurrency Control:** Implement optimistic locking (`@Version` in Hibernate) on the Product entity to prevent lost updates during concurrent purchases, backed by the 15-minute Redis lock.
+* **Background Jobs:** Spring `@Scheduled` tasks to clean up expired Redis cart locks and sync failed payment webhooks.
+
+## 5. Database Schema Proposal (PostgreSQL)
+
+**`users`**
+* `id` (UUID, PK), `email` (Unique), `password_hash`, `role` (ADMIN/CUSTOMER), `created_at`
+
+**`products`**
+* `id` (UUID, PK), `sku` (String, Unique), `name`, `description`, `price` (Decimal), `stock_quantity` (Int), `category_id` (FK), `is_active` (Boolean)
+
+**`carts` (NEW - for 7-day persistence)**
+* `id` (UUID, PK), `user_id` (FK, Nullable), `guest_session_id` (UUID, Nullable), `updated_at` (Timestamp - used to clear abandoned carts after 7 days)
+
+**`cart_items` (NEW)**
+* `id` (UUID, PK), `cart_id` (FK), `product_id` (FK), `quantity` (Int)
+
+**`orders` (UPDATED)**
+* `id` (UUID, PK), `user_id` (FK, Nullable for Guest), `guest_email` (String, Nullable), `total_amount` (Decimal), 
+* **`promo_code_id` (FK, Nullable), `discount_amount` (Decimal, Default 0),**
+* **`payment_status` (Enum: PENDING, PAID, FAILED, REFUNDED),**
+* `fulfillment_status` (Enum: PENDING, PROCESSING, SHIPPED, DELIVERED, CANCELED, **REFUND_PENDING**), 
+* `tracking_number` (String), `created_at`
+
+**`order_items`**
+* `id` (UUID, PK), `order_id` (FK), `product_id` (FK), `quantity` (Int), `unit_price` (Decimal)
+
+**`promotions`**
+* `id` (UUID, PK), `code` (String, Unique), `discount_type` (PERCENT/FIXED), `value` (Decimal), `valid_until` (Timestamp)
+
+*Note: Active checkout inventory locks (15 mins) are managed in Redis. Carts are stored in PostgreSQL to guarantee 7-day persistence across server restarts.*
+
+## 6. API Structure (RESTful)
+All endpoints must be prefixed with `/api/v1/`.
+* **Auth:** `POST /auth/login`, `POST /auth/register`, **`POST /auth/guest-session` (Generates secure guest UUID)**
+* **Catalog:** `GET /products`, `GET /products/{id}`, `GET /categories`
+* **Cart (PostgreSQL):** `GET /cart`, `POST /cart/items`, `DELETE /cart/items/{id}`
+* **Checkout:** **`GET /checkout/shipping-quotes?pin={pin_code}`**, `POST /checkout/lock-inventory`, `POST /checkout/process-payment`
+* **Webhooks:** `POST /webhooks/payment-status`
+* **Admin:** `GET /admin/orders`, `PUT /admin/orders/{id}/status`, `POST /admin/shipping/generate-awb`
+
+## 7. Authentication Strategy
+* **Standard Users/Admins:** JWT (JSON Web Tokens) issued upon login. The token payload contains the user ID and role.
+* **Guest Checkout (UPDATED):** * The frontend calls `POST /auth/guest-session` upon the first visit. 
+    * **The backend generates a UUID and sets it as an `HttpOnly`, `Secure` cookie (e.g., `guest_session_token`).**
+    * The backend automatically reads this cookie for all cart-related API calls to fetch the correct database cart. 
+    * **Do NOT generate authoritative session UUIDs on the frontend.**
+* **Token Storage:** Frontend stores the JWT in an `HttpOnly`, `Secure` cookie. Do NOT store JWTs in `localStorage` due to XSS vulnerabilities.
+
+## 8. Third-Party Dependencies
+* **Payment Aggregator:** Safepay or PayFast (Unified API for PK digital payments).
+* **Logistics:** Trax / Leopards REST APIs.
+* **Email:** SendGrid or Mailgun for transactional emails. (Using an API-based email provider is crucial, as most VPS providers block default SMTP port 25 to prevent spam).
+* **Backend Libraries:** Spring Security, Hibernate (ORM), Lettuce (Redis client), Bucket4j (Rate Limiting).
+
+## 9. Security Parameters (Production Must-Haves)
+* **Secret Management:** **NEVER** commit API keys (Trax, SendGrid, DB credentials) to Git. Inject them into your Docker containers using a `.env` file securely stored on the Hostinger VPS.
+* **Input Sanitization:** Use Jakarta Bean Validation (`@NotBlank`, `@Email`, `@Min`, `@Max`) on all incoming DTOs (Data Transfer Objects) to prevent malicious payloads or SQL injection. 
+* **Rate Limiting:** Implement Bucket4j on critical endpoints (e.g., `/auth/login`, `/checkout/process-payment`) to prevent brute-force attacks and bot-driven inventory hoarding. Limit login attempts to 5 per minute per IP.
+* **CORS Configuration:** Strictly configure Cross-Origin Resource Sharing. Only allow your specific frontend domain (e.g., `https://my-store.pk`) to communicate with the backend API.
+* **Data Integrity:** All monetary calculations must use `BigDecimal` in Java. Never use standard floating-point numbers (`float` or `double`) to avoid precision loss in financial transactions.
+
+## 10. Scalability Considerations
+* **Vertical Scaling:** Starting with a Hostinger VPS allows for easy vertical scaling. If traffic increases, you can upgrade to a higher KVM tier (more CPU/RAM) with a single click in the Hostinger panel, without needing to re-architect the code.
+* **Stateless Backend:** Because sessions are stored in Redis rather than JVM memory, the application is ready to be horizontally scaled (split across multiple servers behind a load balancer) when you eventually outgrow a single VPS.

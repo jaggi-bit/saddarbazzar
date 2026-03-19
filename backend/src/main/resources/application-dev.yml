@@ -1,0 +1,36 @@
+spring:
+  # H2 in-memory database for development
+  datasource:
+    url: jdbc:h2:mem:sadarbazar;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
+    driver-class-name: org.h2.Driver
+    username: sa
+    password:
+
+  h2:
+    console:
+      enabled: true
+      path: /h2-console
+
+  jpa:
+    database-platform: org.hibernate.dialect.H2Dialect
+    hibernate:
+      ddl-auto: create-drop
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+
+  # Disable Redis for dev (will use mock/embedded in Phase 5)
+  data:
+    redis:
+      repositories:
+        enabled: false
+
+  autoconfigure:
+    exclude:
+      - org.springframework.boot.autoconfigure.data.redis.RedisAutoConfiguration
+
+logging:
+  level:
+    com.sadarbazar: DEBUG
+    org.springframework.security: DEBUG

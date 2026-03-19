@@ -1,0 +1,264 @@
+/* ============================= */
+/*  Landing Page Styles          */
+/* ============================= */
+
+.main {
+  position: relative;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+/* Background Effects */
+.bgGlow {
+  position: fixed;
+  top: -20%;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 800px;
+  height: 800px;
+  background: radial-gradient(circle, rgba(108, 60, 225, 0.12) 0%, transparent 70%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+.bgGrid {
+  position: fixed;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(108, 60, 225, 0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(108, 60, 225, 0.03) 1px, transparent 1px);
+  background-size: 60px 60px;
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* Hero Section */
+.hero {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  max-width: 640px;
+  padding: var(--space-xl);
+}
+
+.heroContent {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: var(--space-lg);
+}
+
+/* Logo */
+.logoContainer {
+  margin-bottom: var(--space-sm);
+}
+
+.logo {
+  width: 80px;
+  height: 80px;
+  border-radius: var(--radius-xl);
+  background: var(--gradient-primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: var(--shadow-glow);
+}
+
+.logoIcon {
+  font-size: 2.2rem;
+}
+
+/* Title */
+.title {
+  font-size: 3rem;
+  font-weight: 800;
+  line-height: 1.1;
+  letter-spacing: -1px;
+}
+
+.titleAccent {
+  background: var(--gradient-primary);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.subtitle {
+  font-size: 1.15rem;
+  color: var(--color-text-secondary);
+  max-width: 420px;
+  line-height: 1.5;
+}
+
+.tagline {
+  font-size: 0.85rem;
+  color: var(--color-text-muted);
+  letter-spacing: 0.3px;
+}
+
+/* Status Card */
+.statusCard {
+  width: 100%;
+  background: var(--color-bg-card);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+}
+
+.statusHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-md) var(--space-lg);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.statusTitle {
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+.statusDot {
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--color-success);
+  animation: pulse 2s ease-in-out infinite;
+}
+
+.statusDetails {
+  padding: var(--space-md) var(--space-lg);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+}
+
+.statusRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--space-xs) 0;
+}
+
+.statusLabel {
+  font-size: 0.85rem;
+  color: var(--color-text-muted);
+}
+
+.statusValue {
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: var(--color-text);
+}
+
+.shimmer {
+  width: 100px;
+  height: 14px;
+  border-radius: var(--radius-sm);
+  background: linear-gradient(
+    90deg,
+    var(--color-bg-elevated) 0%,
+    var(--color-border) 50%,
+    var(--color-bg-elevated) 100%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+}
+
+/* Phase Progress Card */
+.phaseCard {
+  width: 100%;
+  background: var(--color-bg-card);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: var(--space-lg);
+}
+
+.phaseTitle {
+  font-size: 0.9rem;
+  font-weight: 600;
+  margin-bottom: var(--space-md);
+}
+
+.phaseGrid {
+  display: flex;
+  gap: var(--space-sm);
+  flex-wrap: wrap;
+}
+
+.phase {
+  flex: 1;
+  min-width: 80px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-xs);
+  padding: var(--space-sm) var(--space-xs);
+  border-radius: var(--radius-md);
+  background: var(--color-bg-elevated);
+  border: 1px solid transparent;
+  transition: all var(--transition-base);
+}
+
+.phaseActive {
+  border-color: var(--color-primary);
+  background: rgba(108, 60, 225, 0.1);
+  box-shadow: 0 0 20px rgba(108, 60, 225, 0.15);
+}
+
+.phaseNumber {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: var(--color-bg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--color-text-muted);
+}
+
+.phaseActive .phaseNumber {
+  background: var(--gradient-primary);
+  color: white;
+}
+
+.phaseName {
+  font-size: 0.7rem;
+  color: var(--color-text-muted);
+  text-align: center;
+}
+
+.phaseActive .phaseName {
+  color: var(--color-primary-light);
+  font-weight: 600;
+}
+
+/* Responsive */
+@media (max-width: 480px) {
+  .title {
+    font-size: 2.2rem;
+  }
+
+  .subtitle {
+    font-size: 1rem;
+  }
+
+  .hero {
+    padding: var(--space-lg);
+  }
+
+  .phaseGrid {
+    gap: var(--space-xs);
+  }
+
+  .phase {
+    min-width: 55px;
+  }
+}
