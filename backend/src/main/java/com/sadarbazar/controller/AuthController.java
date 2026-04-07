@@ -7,6 +7,7 @@ import com.sadarbazar.exception.BusinessException;
 import com.sadarbazar.repository.UserRepository;
 import com.sadarbazar.security.JwtService;
 import com.sadarbazar.security.UserDetailsImpl;
+import com.sadarbazar.service.CartService;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -32,10 +33,12 @@ public class AuthController {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
+    private final CartService cartService;
 
     @PostMapping("/register")
     public ResponseEntity<AuthDTO.AuthResponse> registerUser(
             @Valid @RequestBody AuthDTO.RegisterRequest request, 
+            HttpServletRequest httpRequest,
             HttpServletResponse response) {
             
         if (userRepository.existsByEmail(request.getEmail())) {
@@ -60,12 +63,19 @@ public class AuthController {
         UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
         setJwtCookie(response, jwtService.generateToken(userDetails));
 
+        // Merge guest cart if applicable
+        UUID guestSessionId = getGuestSessionId(httpRequest);
+        if (guestSessionId != null) {
+            cartService.mergeGuestCart(user.getId(), guestSessionId);
+        }
+
         return ResponseEntity.status(HttpStatus.CREATED).body(toAuthResponse(user));
     }
 
     @PostMapping("/login")
     public ResponseEntity<AuthDTO.AuthResponse> login(
             @Valid @RequestBody AuthDTO.LoginRequest request,
+            HttpServletRequest httpRequest,
             HttpServletResponse response) {
 
         Authentication authentication = authenticationManager.authenticate(
@@ -78,6 +88,13 @@ public class AuthController {
         setJwtCookie(response, jwtService.generateToken(userDetails));
         
         User user = userRepository.findByEmail(request.getEmail()).orElseThrow();
+
+        // Merge guest cart if applicable
+        UUID guestSessionId = getGuestSessionId(httpRequest);
+        if (guestSessionId != null) {
+            cartService.mergeGuestCart(user.getId(), guestSessionId);
+        }
+
         return ResponseEntity.ok(toAuthResponse(user));
     }
 
@@ -142,6 +159,21 @@ public class AuthController {
         cookie.setPath("/");
         cookie.setMaxAge(7 * 24 * 60 * 60); // 7 days
         response.addCookie(cookie);
+    }
+
+    private UUID getGuestSessionId(HttpServletRequest request) {
+        if (request.getCookies() != null) {
+            for (Cookie cookie : request.getCookies()) {
+                if ("guest_session_token".equals(cookie.getName())) {
+                    try {
+                        return UUID.fromString(cookie.getValue());
+                    } catch (IllegalArgumentException e) {
+                        return null;
+                    }
+                }
+            }
+        }
+        return null;
     }
 
     private AuthDTO.AuthResponse toAuthResponse(User user) {

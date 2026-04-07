@@ -10,6 +10,7 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
@@ -26,6 +27,7 @@ import java.util.List;
 
 @Configuration
 @EnableWebSecurity
+@EnableMethodSecurity   // Enables @PreAuthorize annotations
 @RequiredArgsConstructor
 public class SecurityConfig {
 
@@ -47,9 +49,13 @@ public class SecurityConfig {
                 .requestMatchers("/auth/**").permitAll()
                 .requestMatchers("/products/**").permitAll()
                 .requestMatchers("/categories/**").permitAll()
+                .requestMatchers("/cart/**").permitAll()
+                .requestMatchers("/checkout/**").permitAll()
+                .requestMatchers("/webhooks/**").permitAll()
                 .requestMatchers("/h2-console/**").permitAll()
-                // Admin endpoints require ADMIN role
-                .requestMatchers("/admin/**").hasRole("ADMIN")
+                // Admin endpoints — any admin role can access the base path.
+                // Fine-grained RBAC is enforced via @PreAuthorize on individual methods.
+                .requestMatchers("/admin/**").hasAnyRole("ADMIN", "SUPER_ADMIN", "MANAGER", "CONTENT_EDITOR")
                 // Everything else requires authentication
                 .anyRequest().authenticated()
             )

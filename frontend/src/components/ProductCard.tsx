@@ -2,6 +2,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { ShoppingBag } from 'lucide-react';
 import { Product } from '@/hooks/useProducts';
+import { useCartStore } from '@/lib/store/useCartStore';
 import styles from './ProductCard.module.css';
 
 interface ProductCardProps {
@@ -9,6 +10,8 @@ interface ProductCardProps {
 }
 
 export default function ProductCard({ product }: ProductCardProps) {
+  const { addItem } = useCartStore();
+
   const formatPrice = (price: number) => {
     return new Intl.NumberFormat('en-PK', {
       style: 'currency',
@@ -73,7 +76,7 @@ export default function ProductCard({ product }: ProductCardProps) {
               className={styles.addBtn}
               onClick={(e) => {
                 e.preventDefault();
-                console.log('Add to cart', product.id);
+                addItem(product.id, 1);
               }}
               aria-label="Add to cart"
             >

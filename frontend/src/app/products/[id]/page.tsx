@@ -6,11 +6,13 @@ import Link from 'next/link';
 import { useParams } from 'next/navigation';
 import { ShoppingBag, ShieldCheck, CreditCard, Truck } from 'lucide-react';
 import { useProduct } from '@/hooks/useProducts';
+import { useCartStore } from '@/lib/store/useCartStore';
 import styles from './page.module.css';
 
 export default function ProductDetailPage() {
   const { id } = useParams();
   const { data: product, isLoading, isError } = useProduct(id as string);
+  const { addItem } = useCartStore();
   
   const [quantity, setQuantity] = useState(1);
   const [activeImageIndex, setActiveImageIndex] = useState(0);
@@ -68,8 +70,7 @@ export default function ProductDetailPage() {
   };
 
   const handleAddToCart = () => {
-    console.log(`Add ${quantity} of ${product.id} to cart`);
-    // Connect to actual cart logic in Phase 5
+    addItem(product.id, quantity);
   };
 
   return (

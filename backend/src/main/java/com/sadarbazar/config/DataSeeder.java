@@ -51,6 +51,28 @@ public class DataSeeder implements CommandLineRunner {
                 .fullName("Admin User")
                 .build());
 
+        // --- RBAC: Additional admin roles for testing ---
+        userRepository.save(User.builder()
+                .email("superadmin@sadarbazar.pk")
+                .passwordHash(passwordEncoder.encode("admin123"))
+                .role(Role.SUPER_ADMIN)
+                .fullName("Super Admin")
+                .build());
+
+        userRepository.save(User.builder()
+                .email("manager@sadarbazar.pk")
+                .passwordHash(passwordEncoder.encode("admin123"))
+                .role(Role.MANAGER)
+                .fullName("Manager User")
+                .build());
+
+        userRepository.save(User.builder()
+                .email("editor@sadarbazar.pk")
+                .passwordHash(passwordEncoder.encode("admin123"))
+                .role(Role.CONTENT_EDITOR)
+                .fullName("Content Editor")
+                .build());
+
         // --- Categories ---
         Category electronics = categoryRepository.save(Category.builder()
                 .name("Electronics").slug("electronics")

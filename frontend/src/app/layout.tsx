@@ -5,6 +5,8 @@ import Providers from "@/lib/providers";
 import AuthProvider from "@/components/AuthProvider";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
+import CartDrawer from "@/components/cart/CartDrawer";
+import ConditionalLayout from "@/components/layout/ConditionalLayout";
 
 // Configure Plus Jakarta Sans for a premium, geometric typographic feel
 const jakarta = Plus_Jakarta_Sans({ 
@@ -28,11 +30,9 @@ export default function RootLayout({
       <body suppressHydrationWarning>
         <Providers>
           <AuthProvider>
-            <Navbar />
-            <main style={{ minHeight: 'calc(100vh - 200px)' }}>
+            <ConditionalLayout>
               {children}
-            </main>
-            <Footer />
+            </ConditionalLayout>
           </AuthProvider>
         </Providers>
       </body>
