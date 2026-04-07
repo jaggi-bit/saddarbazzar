@@ -11,6 +11,8 @@ import org.springframework.http.*;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import com.sadarbazar.service.EmailService;
+
 import java.util.Map;
 import java.util.UUID;
 
@@ -22,6 +24,7 @@ public class ShippingController {
 
     private final LogisticsFacade logisticsFacade;
     private final OrderRepository orderRepository;
+    private final EmailService emailService;
 
     /**
      * Generate AWB via the configured logistics provider (PostEx).
@@ -40,6 +43,9 @@ public class ShippingController {
             order.setCourierName(logisticsFacade.getProviderName());
             order.setFulfillmentStatus(FulfillmentStatus.SHIPPED);
             orderRepository.save(order);
+
+            // Send shipped notification email
+            emailService.sendOrderShippedNotification(order);
 
             return ResponseEntity.ok(Map.of(
                     "trackingNumber", trackingNumber,

@@ -5,6 +5,20 @@ spring:
   profiles:
     active: dev
 
+  # Email (Mailtrap sandbox for testing, swap for production SMTP)
+  mail:
+    host: ${MAIL_HOST:sandbox.smtp.mailtrap.io}
+    port: ${MAIL_PORT:2525}
+    username: ${MAIL_USERNAME:1671970da42303}
+    password: ${MAIL_PASSWORD:dc97480978fb74}
+    properties:
+      mail.smtp.auth: true
+      mail.smtp.starttls.enable: true
+
+  # Disable Thymeleaf auto-resolution for web views (we only use it for emails)
+  thymeleaf:
+    check-template-location: false
+
 server:
   port: 8080
   servlet:
@@ -30,6 +44,10 @@ app:
   health:
     payment-ping-url: ${HEALTH_PAYMENT_PING_URL:}
     logistics-ping-url: ${HEALTH_LOGISTICS_PING_URL:}
+  mail:
+    from: ${MAIL_FROM:noreply@sadarbazar.pk}
+    admin-email: ${ADMIN_EMAIL:admin@sadarbazar.pk}
+    enabled: ${MAIL_ENABLED:true}
 
 # PostEx Logistics
 logistics:

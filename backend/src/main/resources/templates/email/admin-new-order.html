@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head><meta charset="UTF-8"/></head>
+<body style="margin:0; padding:0; background:#f1f5f9; font-family:'Segoe UI',Arial,sans-serif;">
+<table width="100%" cellpadding="0" cellspacing="0" style="background:#f1f5f9; padding:40px 0;">
+  <tr><td align="center">
+    <table width="600" cellpadding="0" cellspacing="0" style="background:#ffffff; border-radius:16px; overflow:hidden; box-shadow:0 4px 24px rgba(0,0,0,0.08);">
+
+      <!-- Header -->
+      <tr><td style="background:linear-gradient(135deg,#0f172a,#1e293b); padding:24px 40px; text-align:center;">
+        <h1 style="color:#ffffff; margin:0; font-size:20px;">🛒 New Order Received</h1>
+      </td></tr>
+
+      <!-- Content -->
+      <tr><td style="padding:32px 40px;">
+        <table width="100%" style="margin-bottom:20px;" cellpadding="8">
+          <tr>
+            <td style="color:#64748b; font-size:12px; font-weight:600;">Order ID</td>
+            <td style="color:#6c3ce1; font-size:14px; font-weight:700; text-align:right;" th:text="'#' + ${orderId}">#ABC123</td>
+          </tr>
+          <tr>
+            <td style="color:#64748b; font-size:12px; font-weight:600;">Customer</td>
+            <td style="color:#0f172a; font-size:13px; text-align:right;" th:text="${customerName}">John</td>
+          </tr>
+          <tr>
+            <td style="color:#64748b; font-size:12px; font-weight:600;">Phone</td>
+            <td style="color:#0f172a; font-size:13px; text-align:right;" th:text="${customerPhone}">03001234567</td>
+          </tr>
+          <tr>
+            <td style="color:#64748b; font-size:12px; font-weight:600;">City</td>
+            <td style="color:#0f172a; font-size:13px; text-align:right;" th:text="${shippingCity}">Karachi</td>
+          </tr>
+          <tr>
+            <td style="color:#64748b; font-size:12px; font-weight:600;">Payment</td>
+            <td style="color:#0f172a; font-size:13px; text-align:right;" th:text="${paymentMethod}">COD</td>
+          </tr>
+          <tr style="border-top:2px solid #e2e8f0;">
+            <td style="color:#0f172a; font-size:14px; font-weight:700; padding-top:12px;">Total Amount</td>
+            <td style="color:#6c3ce1; font-size:18px; font-weight:800; text-align:right; padding-top:12px;" th:text="'Rs. ' + ${total}">Rs. 0</td>
+          </tr>
+        </table>
+
+        <!-- Items -->
+        <h3 style="margin:0 0 8px; font-size:13px; color:#64748b; text-transform:uppercase; letter-spacing:1px;">Items</h3>
+        <table width="100%" cellpadding="4" cellspacing="0" style="font-size:12px; background:#f8fafc; border-radius:8px; padding:8px;">
+          <tr th:each="item : ${items}" style="border-bottom:1px solid #e2e8f0;">
+            <td style="color:#0f172a;" th:text="${item.name}">Product</td>
+            <td style="color:#64748b; text-align:center;" th:text="'× ' + ${item.qty}">× 1</td>
+            <td style="color:#0f172a; font-weight:600; text-align:right;" th:text="'Rs. ' + ${item.total}">Rs. 500</td>
+          </tr>
+        </table>
+      </td></tr>
+
+      <!-- Footer -->
+      <tr><td style="background:#f8fafc; padding:16px 40px; text-align:center; border-top:1px solid #e2e8f0;">
+        <p style="margin:0; color:#94a3b8; font-size:11px;">Sadar Bazar Admin Alert — Auto-generated</p>
+      </td></tr>
+
+    </table>
+  </td></tr>
+</table>
+</body>
+</html>

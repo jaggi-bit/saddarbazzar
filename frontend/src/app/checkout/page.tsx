@@ -5,9 +5,19 @@ import { useRouter } from 'next/navigation';
 import { useCartStore } from '@/lib/store/useCartStore';
 import { useAuthStore } from '@/lib/store/useAuthStore';
 import api from '@/lib/api';
-import { ShieldCheck, Truck, CreditCard, Loader2 } from 'lucide-react';
+import { ShieldCheck, Truck, CreditCard, Loader2, MapPin } from 'lucide-react';
 import Image from 'next/image';
 import styles from './page.module.css';
+
+const PROVINCES = [
+  'Sindh',
+  'Punjab',
+  'Balochistan',
+  'Khyber Pakhtunkhwa',
+  'Gilgit-Baltistan',
+  'Azad Jammu & Kashmir',
+  'Islamabad Capital Territory'
+];
 
 export default function CheckoutPage() {
   const router = useRouter();
@@ -15,14 +25,20 @@ export default function CheckoutPage() {
   const { user } = useAuthStore();
 
   const [isLoading, setIsLoading] = useState(false);
+  const [isLocating, setIsLocating] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const [formData, setFormData] = useState({
     shippingName: user?.fullName || '',
-    shippingAddress: '',
-    shippingCity: '',
-    shippingPinCode: '',
     shippingPhone: '',
+    shippingEmail: user?.email || '',
+    shippingProvince: '',
+    shippingCity: '',
+    shippingDistrict: '',
+    shippingAddress: '',
+    shippingAddressCategory: 'Home',
+    shippingLandmark: '',
+    shippingPinCode: '',
     orderNote: '',
     paymentMethod: 'COD', // Default to COD
   });
@@ -41,7 +57,7 @@ export default function CheckoutPage() {
   const shippingAmount = 200; // Flat rate
   const totalAmount = cart.subtotal + shippingAmount;
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
@@ -50,10 +66,48 @@ export default function CheckoutPage() {
     setFormData((prev) => ({ ...prev, paymentMethod: method }));
   };
 
+  const handleGetLocation = () => {
+    if ('geolocation' in navigator) {
+      setIsLocating(true);
+      navigator.geolocation.getCurrentPosition(
+        async (position) => {
+          const { latitude, longitude } = position.coords;
+          try {
+            // Reverse geocoding best effort using OpenStreetMap
+            const response = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}`);
+            const data = await response.json();
+            if (data && data.display_name) {
+              setFormData((prev) => ({ ...prev, shippingAddress: data.display_name }));
+            } else {
+              setFormData((prev) => ({ ...prev, shippingAddress: `${latitude}, ${longitude}` }));
+            }
+          } catch (e) {
+            setFormData((prev) => ({ ...prev, shippingAddress: `${latitude}, ${longitude}` }));
+          } finally {
+            setIsLocating(false);
+          }
+        },
+        (error) => {
+          console.error(error);
+          alert('Could not fetch location. Please enable location services in your browser.');
+          setIsLocating(false);
+        }
+      );
+    } else {
+      alert('Geolocation is not supported by your browser.');
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
     setError(null);
+
+    if (!formData.shippingProvince) {
+      setError("Please select a province.");
+      setIsLoading(false);
+      return;
+    }
 
     try {
       const response = await api.post('/checkout', formData);
@@ -107,6 +161,21 @@ export default function CheckoutPage() {
                   />
                 </div>
                 <div className={styles.inputWrapper}>
+                  <label htmlFor="shippingEmail">Email Address</label>
+                  <input
+                    type="email"
+                    id="shippingEmail"
+                    name="shippingEmail"
+                    value={formData.shippingEmail}
+                    onChange={handleInputChange}
+                    placeholder="example@mail.com"
+                    required
+                  />
+                </div>
+              </div>
+
+              <div className={styles.inputRow}>
+                <div className={styles.inputWrapper}>
                   <label htmlFor="shippingPhone">Phone Number</label>
                   <input
                     type="tel"
@@ -118,22 +187,68 @@ export default function CheckoutPage() {
                     required
                   />
                 </div>
+                <div className={styles.inputWrapper}>
+                  <label htmlFor="shippingAddressCategory">Address Category</label>
+                  <select
+                    id="shippingAddressCategory"
+                    name="shippingAddressCategory"
+                    value={formData.shippingAddressCategory}
+                    onChange={handleInputChange}
+                    required
+                    style={{ padding: '0.75rem', borderRadius: '8px', border: '1px solid #cbd5e1', width: '100%' }}
+                  >
+                    <option value="Home">Home</option>
+                    <option value="Office">Office</option>
+                    <option value="Other">Other</option>
+                  </select>
+                </div>
               </div>
 
               <div className={styles.inputWrapper}>
-                <label htmlFor="shippingAddress">Street Address</label>
-                <input
-                  type="text"
-                  id="shippingAddress"
-                  name="shippingAddress"
-                  value={formData.shippingAddress}
-                  onChange={handleInputChange}
-                  placeholder="House No, Street, Area"
-                  required
-                />
+                <label htmlFor="shippingAddress">Full Address</label>
+                <div style={{ display: 'flex', gap: '8px' }}>
+                  <input
+                    type="text"
+                    id="shippingAddress"
+                    name="shippingAddress"
+                    value={formData.shippingAddress}
+                    onChange={handleInputChange}
+                    placeholder="House No, Street, Area"
+                    required
+                    style={{ flex: 1 }}
+                  />
+                  <button 
+                    type="button" 
+                    onClick={handleGetLocation} 
+                    disabled={isLocating}
+                    style={{
+                      display: 'flex', alignItems: 'center', justifyContent: 'center',
+                      background: '#e2e8f0', color: '#334155', border: 'none', borderRadius: '8px', padding: '0 12px', cursor: 'pointer'
+                    }}
+                    title="Get Current Location automatically"
+                  >
+                    {isLocating ? <Loader2 size={20} className="animate-spin" /> : <MapPin size={20} />}
+                  </button>
+                </div>
               </div>
 
               <div className={styles.inputRow}>
+                <div className={styles.inputWrapper}>
+                  <label htmlFor="shippingProvince">Province</label>
+                  <select
+                    id="shippingProvince"
+                    name="shippingProvince"
+                    value={formData.shippingProvince}
+                    onChange={handleInputChange}
+                    required
+                    style={{ padding: '0.75rem', borderRadius: '8px', border: '1px solid #cbd5e1', width: '100%' }}
+                  >
+                    <option value="" disabled>Select province...</option>
+                    {PROVINCES.map(prov => (
+                      <option key={prov} value={prov}>{prov}</option>
+                    ))}
+                  </select>
+                </div>
                 <div className={styles.inputWrapper}>
                   <label htmlFor="shippingCity">City</label>
                   <input
@@ -146,15 +261,30 @@ export default function CheckoutPage() {
                     required
                   />
                 </div>
+              </div>
+
+              <div className={styles.inputRow}>
                 <div className={styles.inputWrapper}>
-                  <label htmlFor="shippingPinCode">Postal Code (Optional)</label>
+                  <label htmlFor="shippingDistrict">District / Area</label>
                   <input
                     type="text"
-                    id="shippingPinCode"
-                    name="shippingPinCode"
-                    value={formData.shippingPinCode}
+                    id="shippingDistrict"
+                    name="shippingDistrict"
+                    value={formData.shippingDistrict}
                     onChange={handleInputChange}
-                    placeholder="Ex. 75600"
+                    placeholder="Defence, Clifton, Gulshan"
+                    required
+                  />
+                </div>
+                <div className={styles.inputWrapper}>
+                  <label htmlFor="shippingLandmark">Nearby Landmark (Optional)</label>
+                  <input
+                    type="text"
+                    id="shippingLandmark"
+                    name="shippingLandmark"
+                    value={formData.shippingLandmark}
+                    onChange={handleInputChange}
+                    placeholder="Opposite hospital, Near park"
                   />
                 </div>
               </div>
@@ -167,7 +297,7 @@ export default function CheckoutPage() {
                   value={formData.orderNote}
                   onChange={handleInputChange}
                   placeholder="Any special instructions for delivery..."
-                  rows={3}
+                  rows={2}
                 />
               </div>
             </div>
@@ -280,3 +410,4 @@ export default function CheckoutPage() {
     </div>
   );
 }
+

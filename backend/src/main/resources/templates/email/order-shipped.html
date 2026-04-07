@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head><meta charset="UTF-8"/></head>
+<body style="margin:0; padding:0; background:#f1f5f9; font-family:'Segoe UI',Arial,sans-serif;">
+<table width="100%" cellpadding="0" cellspacing="0" style="background:#f1f5f9; padding:40px 0;">
+  <tr><td align="center">
+    <table width="600" cellpadding="0" cellspacing="0" style="background:#ffffff; border-radius:16px; overflow:hidden; box-shadow:0 4px 24px rgba(0,0,0,0.08);">
+
+      <!-- Header -->
+      <tr><td style="background:linear-gradient(135deg,#059669,#10b981); padding:32px 40px; text-align:center;">
+        <h1 style="color:#ffffff; margin:0; font-size:24px;">📦 Your Order Has Shipped!</h1>
+        <p style="color:#d1fae5; margin:8px 0 0; font-size:14px;">It's on the way to you</p>
+      </td></tr>
+
+      <!-- Content -->
+      <tr><td style="padding:32px 40px;">
+        <p style="margin:0 0 16px; color:#0f172a; font-size:16px;">Hi <strong th:text="${customerName}">Customer</strong>,</p>
+        <p style="margin:0 0 24px; color:#475569; font-size:14px; line-height:1.6;">
+          Great news! Your order <strong style="color:#6c3ce1;" th:text="'#' + ${orderId}">#ABC123</strong>
+          has been shipped via <strong th:text="${courierName}">PostEx</strong>.
+        </p>
+
+        <!-- Tracking Box -->
+        <table width="100%" style="background:#f0fdf4; border:2px solid #bbf7d0; border-radius:12px; padding:20px; margin-bottom:24px;" cellpadding="0">
+          <tr><td style="text-align:center;">
+            <p style="margin:0 0 8px; color:#064e3b; font-size:12px; font-weight:600; text-transform:uppercase; letter-spacing:1px;">Tracking Number</p>
+            <p style="margin:0 0 16px; color:#065f46; font-size:22px; font-weight:800; letter-spacing:2px;" th:text="${trackingNumber}">1234567890</p>
+            <a th:href="${trackingUrl}" style="display:inline-block; background:#059669; color:#ffffff; text-decoration:none; padding:12px 32px; border-radius:8px; font-size:14px; font-weight:600;">
+              Track Your Order →
+            </a>
+          </td></tr>
+        </table>
+
+        <!-- Delivery Info -->
+        <table width="100%" style="background:#f8fafc; border-radius:12px; padding:16px; margin-bottom:16px;" cellpadding="8">
+          <tr>
+            <td style="color:#64748b; font-size:12px; font-weight:600;">Courier</td>
+            <td style="color:#0f172a; font-size:13px; text-align:right;" th:text="${courierName}">PostEx</td>
+          </tr>
+          <tr>
+            <td style="color:#64748b; font-size:12px; font-weight:600;">Delivering To</td>
+            <td style="color:#0f172a; font-size:13px; text-align:right;" th:text="${shippingAddress} + ', ' + ${shippingCity}">Address, City</td>
+          </tr>
+          <tr>
+            <td style="color:#64748b; font-size:12px; font-weight:600;">Total Amount</td>
+            <td style="color:#0f172a; font-size:13px; font-weight:700; text-align:right;" th:text="'Rs. ' + ${total}">Rs. 0</td>
+          </tr>
+        </table>
+      </td></tr>
+
+      <!-- Footer -->
+      <tr><td style="background:#f8fafc; padding:24px 40px; text-align:center; border-top:1px solid #e2e8f0;">
+        <p style="margin:0; color:#94a3b8; font-size:12px;">Sadar Bazar — Your favourite shopping destination</p>
+        <p style="margin:4px 0 0; color:#cbd5e1; font-size:11px;">This is an automated email. Please do not reply.</p>
+      </td></tr>
+
+    </table>
+  </td></tr>
+</table>
+</body>
+</html>
