@@ -6,12 +6,19 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { useState, useEffect, useRef } from 'react';
 import { Search, ShoppingBag, User, LogOut, LayoutDashboard } from 'lucide-react';
 import { useAuthStore } from '@/lib/store/useAuthStore';
+import { useCartStore } from '@/lib/store/useCartStore';
 import styles from './Navbar.module.css';
 
 export default function Navbar() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { user, isAuthenticated, logout } = useAuthStore();
+  const { cart, setIsOpen, fetchCart } = useCartStore();
+
+  // Fetch cart on mount
+  useEffect(() => {
+    fetchCart();
+  }, [fetchCart]);
 
   const [searchQuery, setSearchQuery] = useState(searchParams.get('q') || '');
   const [debouncedQuery, setDebouncedQuery] = useState('');
@@ -151,10 +158,9 @@ export default function Navbar() {
         {/* Actions */}
         <div className={styles.actionsArea}>
 
-          <button className={styles.iconBtn} onClick={() => router.push('/cart')} aria-label="Cart">
+          <button className={styles.iconBtn} onClick={() => setIsOpen(true)} aria-label="Cart">
             <ShoppingBag size={22} strokeWidth={2} />
-            {/* Hardcoded 0 for Phase 4, will connect in Phase 5 */}
-            <span className={styles.cartBadge}>0</span>
+            <span className={styles.cartBadge}>{cart?.items?.length || 0}</span>
           </button>
 
           <div className={styles.authButtons}>

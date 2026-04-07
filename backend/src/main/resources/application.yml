@@ -21,3 +21,18 @@ app:
     expiry-days: 7
   inventory-lock:
     ttl-minutes: 15
+  payment:
+    gateway-name: ${PAYMENT_GATEWAY_NAME:ONLINE}
+    api-key: ${PAYMENT_API_KEY:}
+    secret-key: ${PAYMENT_SECRET_KEY:}
+    webhook-secret: ${PAYMENT_WEBHOOK_SECRET:}
+    sandbox: ${PAYMENT_SANDBOX:true}
+  health:
+    payment-ping-url: ${HEALTH_PAYMENT_PING_URL:}
+    logistics-ping-url: ${HEALTH_LOGISTICS_PING_URL:}
+
+# PostEx Logistics
+logistics:
+  postex:
+    token: ${POSTEX_API_TOKEN:}
+    url: ${POSTEX_BASE_URL:https://api.postex.pk/services/integration/api}

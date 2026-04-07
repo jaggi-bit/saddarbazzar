@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import api from '@/lib/api';
 import { useAuthStore } from '@/lib/store/useAuthStore';
@@ -9,6 +9,9 @@ import styles from './page.module.css';
 
 export default function LoginPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const redirectTo = searchParams.get('redirect') || '/';
+  const reason = searchParams.get('reason');
   const checkAuth = useAuthStore((state) => state.checkAuth);
   const [formData, setFormData] = useState({ email: '', password: '' });
   const [error, setError] = useState('');
@@ -27,7 +30,7 @@ export default function LoginPage() {
     try {
       await api.post('/auth/login', formData);
       await checkAuth(); // refresh zustand state
-      router.push('/'); // redirect to home or protected page
+      router.push(redirectTo); // redirect to intended page (or home)
     } catch (err: any) {
       if (err.response?.data?.message) {
         setError(err.response.data.message);
@@ -44,6 +47,12 @@ export default function LoginPage() {
       <div className={styles.authCard}>
         <h1 className={styles.title}>Welcome Back</h1>
         <p className={styles.subtitle}>Sign in to your Sadar Bazar account</p>
+
+        {reason === 'admin' && (
+          <div style={{ background: '#fef3c7', color: '#92400e', padding: '10px 16px', borderRadius: 8, marginBottom: 16, fontSize: '0.85rem', fontWeight: 500 }}>
+            🔒 Admin access required. Please log in with your admin credentials.
+          </div>
+        )}
 
         <form onSubmit={handleSubmit}>
           <div className={styles.formGroup}>
