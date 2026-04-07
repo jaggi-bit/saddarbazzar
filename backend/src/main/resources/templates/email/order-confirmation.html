@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head><meta charset="UTF-8"/></head>
+<body style="margin:0; padding:0; background:#f1f5f9; font-family:'Segoe UI',Arial,sans-serif;">
+<table width="100%" cellpadding="0" cellspacing="0" style="background:#f1f5f9; padding:40px 0;">
+  <tr><td align="center">
+    <table width="600" cellpadding="0" cellspacing="0" style="background:#ffffff; border-radius:16px; overflow:hidden; box-shadow:0 4px 24px rgba(0,0,0,0.08);">
+
+      <!-- Header -->
+      <tr><td style="background:linear-gradient(135deg,#6c3ce1,#8b5cf6); padding:32px 40px; text-align:center;">
+        <h1 style="color:#ffffff; margin:0; font-size:24px;">✅ Order Confirmed!</h1>
+        <p style="color:#e0d4fc; margin:8px 0 0; font-size:14px;">Thank you for shopping at Sadar Bazar</p>
+      </td></tr>
+
+      <!-- Order Info -->
+      <tr><td style="padding:32px 40px;">
+        <p style="margin:0 0 16px; color:#0f172a; font-size:16px;">Hi <strong th:text="${customerName}">Customer</strong>,</p>
+        <p style="margin:0 0 24px; color:#475569; font-size:14px; line-height:1.6;">
+          Your order <strong style="color:#6c3ce1;" th:text="'#' + ${orderId}">#ABC123</strong> has been placed successfully.
+          We're getting it ready for you!
+        </p>
+
+        <table width="100%" style="background:#f8fafc; border-radius:12px; padding:16px; margin-bottom:24px;" cellpadding="8">
+          <tr>
+            <td style="color:#64748b; font-size:12px; font-weight:600;">Order Date</td>
+            <td style="color:#0f172a; font-size:13px; text-align:right;" th:text="${orderDate}">01 Jan 2026</td>
+          </tr>
+          <tr>
+            <td style="color:#64748b; font-size:12px; font-weight:600;">Payment Method</td>
+            <td style="color:#0f172a; font-size:13px; text-align:right;" th:text="${paymentMethod}">COD</td>
+          </tr>
+          <tr>
+            <td style="color:#64748b; font-size:12px; font-weight:600;">Delivery To</td>
+            <td style="color:#0f172a; font-size:13px; text-align:right;" th:text="${shippingAddress} + ', ' + ${shippingCity}">Address, City</td>
+          </tr>
+        </table>
+
+        <!-- Items -->
+        <h3 style="margin:0 0 12px; font-size:14px; color:#0f172a; border-bottom:1px solid #e2e8f0; padding-bottom:8px;">Items Ordered</h3>
+        <table width="100%" cellpadding="6" cellspacing="0" style="font-size:13px; margin-bottom:16px;">
+          <tr th:each="item : ${items}" style="border-bottom:1px solid #f1f5f9;">
+            <td style="color:#0f172a;" th:text="${item.name}">Product</td>
+            <td style="color:#64748b; text-align:center;" th:text="'× ' + ${item.qty}">× 1</td>
+            <td style="color:#0f172a; font-weight:600; text-align:right;" th:text="'Rs. ' + ${item.total}">Rs. 500</td>
+          </tr>
+        </table>
+
+        <!-- Totals -->
+        <table width="100%" cellpadding="6" cellspacing="0" style="font-size:13px; background:#f8fafc; border-radius:8px; padding:8px;">
+          <tr>
+            <td style="color:#64748b;">Subtotal</td>
+            <td style="text-align:right; color:#0f172a;" th:text="'Rs. ' + ${subtotal}">Rs. 0</td>
+          </tr>
+          <tr>
+            <td style="color:#64748b;">Shipping</td>
+            <td style="text-align:right; color:#0f172a;" th:text="'Rs. ' + ${shipping}">Rs. 200</td>
+          </tr>
+          <tr th:if="${discount != null and discount > 0}">
+            <td style="color:#10b981;">Discount</td>
+            <td style="text-align:right; color:#10b981;" th:text="'-Rs. ' + ${discount}">-Rs. 0</td>
+          </tr>
+          <tr style="border-top:2px solid #e2e8f0;">
+            <td style="font-weight:700; font-size:15px; color:#0f172a; padding-top:8px;">Total</td>
+            <td style="font-weight:700; font-size:15px; color:#6c3ce1; text-align:right; padding-top:8px;" th:text="'Rs. ' + ${total}">Rs. 0</td>
+          </tr>
+        </table>
+      </td></tr>
+
+      <!-- Footer -->
+      <tr><td style="background:#f8fafc; padding:24px 40px; text-align:center; border-top:1px solid #e2e8f0;">
+        <p style="margin:0; color:#94a3b8; font-size:12px;">Sadar Bazar — Your favourite shopping destination</p>
+        <p style="margin:4px 0 0; color:#cbd5e1; font-size:11px;">This is an automated email. Please do not reply.</p>
+      </td></tr>
+
+    </table>
+  </td></tr>
+</table>
+</body>
+</html>

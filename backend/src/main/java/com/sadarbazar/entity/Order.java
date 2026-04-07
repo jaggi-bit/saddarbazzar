@@ -51,6 +51,21 @@ public class Order {
     @Column(name = "shipping_phone", nullable = false)
     private String shippingPhone;
 
+    @Column(name = "shipping_email")
+    private String shippingEmail;
+
+    @Column(name = "shipping_province")
+    private String shippingProvince;
+
+    @Column(name = "shipping_district")
+    private String shippingDistrict;
+
+    @Column(name = "shipping_landmark")
+    private String shippingLandmark;
+
+    @Column(name = "shipping_address_category")
+    private String shippingAddressCategory; // "home", "office", etc.
+
     // --- Order Note (User customization notes) ---
     @Column(name = "order_note", columnDefinition = "TEXT")
     private String orderNote;

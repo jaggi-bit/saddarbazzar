@@ -22,6 +22,7 @@ public class CheckoutService {
     private final OrderRepository orderRepository;
     private final InventoryLockService inventoryLockService;
     private final PaymentGatewayFactory paymentGatewayFactory;
+    private final EmailService emailService;
     
     @Transactional
     public CheckoutDTO.Response checkout(UUID userId, UUID guestSessionId, CheckoutDTO.Request request) {
@@ -63,6 +64,11 @@ public class CheckoutService {
                 .shippingCity(request.getShippingCity())
                 .shippingPinCode(request.getShippingPinCode())
                 .shippingPhone(request.getShippingPhone())
+                .shippingEmail(request.getShippingEmail())
+                .shippingProvince(request.getShippingProvince())
+                .shippingDistrict(request.getShippingDistrict())
+                .shippingLandmark(request.getShippingLandmark())
+                .shippingAddressCategory(request.getShippingAddressCategory())
                 .orderNote(request.getOrderNote())
                 .paymentMethod(request.getPaymentMethod())
                 .subtotalAmount(subtotal)
@@ -94,6 +100,10 @@ public class CheckoutService {
         // Clear cart
         cart.getItems().clear();
         cartRepository.save(cart);
+
+        // Send emails asynchronously
+        emailService.sendOrderConfirmation(savedOrder);
+        emailService.sendAdminNewOrderAlert(savedOrder);
 
         return response;
     }

@@ -30,6 +30,20 @@ public class CheckoutDTO {
         @NotBlank(message = "Shipping Phone is required")
         private String shippingPhone;
         
+        @NotBlank(message = "Shipping Email is required")
+        private String shippingEmail;
+
+        @NotBlank(message = "Shipping Province is required")
+        private String shippingProvince;
+
+        @NotBlank(message = "Shipping District is required")
+        private String shippingDistrict;
+
+        private String shippingLandmark;
+
+        @NotBlank(message = "Address Category is required")
+        private String shippingAddressCategory;
+        
         private String promoCode;
         private String orderNote;
         
